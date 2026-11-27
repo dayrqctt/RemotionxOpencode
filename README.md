@@ -17,10 +17,21 @@ remotion-video-director/
 
 ## Instalasi Lokal (OpenCode)
 
-Salin isi folder ke direktori konfigurasi OpenCode:
+Salin isi folder ke direktori konfigurasi OpenCode (macOS/Linux `~/.config/opencode/`, Windows `%USERPROFILE%\.config\opencode\`):
 
 - `commands/remotion.md` → `~/.config/opencode/commands/remotion.md`
 - `skills/remotion-video-director/` → `~/.config/opencode/skills/remotion-video-director/`
+
+## Konfigurasi Path Portabel (Opsional)
+
+Semua path di-resolve otomatis per OS tanpa hardcode mesin lokal, dan bisa di-override via environment variable:
+
+| Variabel | Fungsi | Default |
+|---|---|---|
+| `REMOTION_WORKSPACE` | Workspace sementara proyek | `${TMPDIR:-/tmp}/remotion-<slug>` (macOS/Linux) atau `%TEMP%\remotion-<slug>` (Windows) |
+| `REMOTION_OUT` | Folder output `.mp4` final | `<Documents user>/Remotion` |
+| `REMOTION_TEMPLATES_DIR` | Lokasi template opsional (`remotion-elevenlabs`, `remotion-tips-9x16`) | `<Documents user>` (jika tidak ada, scaffold proyek baru) |
+| `LEMO_OPUSCAR_HOME` | Lokasi library `lemo-opuscar` | `~/lemo-opuscar` |
 
 ## Dependensi Eksternal
 

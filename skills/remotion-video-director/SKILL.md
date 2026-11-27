@@ -1,6 +1,6 @@
 ---
 name: remotion-video-director
-description: Master workflow produksi video Remotion (4 jalur input, Brief, Riset & Fact-Check, 99 Style Opuscar, TTS Emosional ElevenLabs/VoiceStudio, Preview Gate, Checklist, Export MP4 ke Documents/Remotion, Cleanup).
+description: Master workflow produksi video Remotion (4 jalur input, Brief, Riset & Fact-Check, 99 Style Opuscar, TTS Emosional ElevenLabs/VoiceStudio, Preview Gate, Checklist, Export MP4 ke folder output portabel, Cleanup).
 ---
 
 # Remotion Video Director
@@ -13,9 +13,10 @@ Ikuti seluruh fase di bawah ini secara berurutan. Jangan melompati fase gate (ko
 
 ## FASE 0: ORGANISASI PROYEK & WORKSPACE SEMENTARA
 
-1. Pisahkan area kerja dari folder hasil agar folder output tetap bersih:
-   - **Workspace sementara:** `C:\Users\Hida\AppData\Local\Temp\antigravity\remotion-<slug>` (gunakan template dari `C:\Users\Hida\Documents\remotion-elevenlabs` atau `C:\Users\Hida\Documents\remotion-tips-9x16` jika relevan, lalu sesuaikan).
-   - **Folder output final (eksklusif `.mp4`):** `C:\Users\Hida\Documents\Remotion\`
+1. Pisahkan area kerja dari folder hasil agar folder output tetap bersih. **Jangan hardcode path mesin pribadi:** resolve path dari environment OS, lalu beri tahu user path aktualnya.
+   - **Workspace sementara:** subfolder `remotion-<slug>` di direktori temp sistem — `${TMPDIR:-/tmp}/remotion-<slug>` (macOS/Linux) atau `%TEMP%\remotion-<slug>` (Windows). Override dengan `$REMOTION_WORKSPACE` bila user menyebut folder lain.
+   - **Folder output final (eksklusif `.mp4`):** `$REMOTION_OUT`. Default: folder Documents milik user + `Remotion`. Resolve Documents lewat OS: PowerShell `[Environment]::GetFolderPath('MyDocuments')`, macOS/Linux `$HOME/Documents`. Buat folder bila belum ada.
+   - **Template referensi (opsional):** cari `remotion-elevenlabs` atau `remotion-tips-9x16` di `$REMOTION_TEMPLATES_DIR` (default: folder Documents user). Jika tidak ada, scaffold proyek Remotion dari nol (`npx create-video@latest`, atau struktur manual sesuai Langkah 2). Ketidakhadiran template bukan alasan berhenti — lanjutkan dengan struktur standar.
 2. Struktur rapi di dalam workspace sementara:
    - `docs/01-brief.md` — tema, ukuran, FPS, durasi, bahasa, target platform, style pilihan
    - `docs/02-research.md` — fakta terverifikasi + tabel fact-check + sumber primer (output skill `research`)
@@ -91,7 +92,9 @@ Gunakan skill terinstall: `research`, `antislop-copywriting`, `writing-beats`, `
 Gunakan skill terinstall: `lemo-opuscar`, `design-taste-frontend`, `antislop-ui`, `antislop-human`, `antislop-layoutmobile`.
 
 ### A. Pilihan Design Video (`lemo-opuscar`)
-Jika style belum dipilih, rekomendasikan 2–3 opsi terbaik atau biarkan user memilih dari 99 style berikut. Setelah dipilih, wajib baca `C:\Users\Hida\lemo-opuscar\styles\<folder>\STYLE.md` untuk mengadopsi palet warna, tipografi, motion grammar, camera grammar, dan sound palette ke komponen Remotion:
+Jika style belum dipilih, rekomendasikan 2–3 opsi terbaik atau biarkan user memilih dari 99 style berikut. Setelah dipilih, wajib baca `$LEMO_OPUSCAR_HOME/styles/<folder>/STYLE.md` untuk mengadopsi palet warna, tipografi, motion grammar, camera grammar, dan sound palette ke komponen Remotion. Default library: `~/lemo-opuscar` (override `$LEMO_OPUSCAR_HOME`). Jika folder tidak ada, jalankan setup skill `lemo-opuscar` dulu, atau minta user menunjukkan lokasi library.
+
+Daftar 15 kategori style:
 
 1. **Edit & Documentary (8):** `caption-news`, `newsreel`, `countdown`, `city-symphony`, `visual-investigation`, `kino-montage`, `telestrator`, `news-package`
 2. **Painting & Illustration (5):** `crayon-book`, `watercolor`, `impasto`, `urban-sketch`, `colored-pencil`
@@ -137,20 +140,20 @@ Pilih provider TTS sesuai kebutuhan di Brief (atau mode hybrid: **VoiceStudio lo
    - Gunakan tanda baca alami (`...`, `—`, koma, tanda seru/tanya secara proporsional) untuk mengatur jeda napas dan penekanan kata.
    - Eja istilah teknis/singkatan asing secara fonetik bila rawan salah ucap.
 3. **Generate Speech + Timestamps via CLI (`convert_with_timestamps`):**
-   - Jalankan per scene:
-     ```powershell
-     elevenlabs text-to-speech convert_with_timestamps `
-       --voice-id "<voice_id>" `
-       --model-id "eleven_multilingual_v2" `
-       --text "<scene.text>" `
-       --previous-text "<prev_scene.text>" `
-       --next-text "<next_scene.text>" `
-       --voice-settings.stability 0.55 `
-       --voice-settings.similarity-boost 0.8 `
-       --voice-settings.style 0.25 `
-       --voice-settings.use-speaker-boost true `
-       --voice-settings.speed 1.0 `
-       --output-format mp3_44100_128 `
+   - Jalankan per scene (POSIX shell; PowerShell: ganti `\` dengan backtick `` ` `` sebagai line continuation):
+     ```sh
+     elevenlabs text-to-speech convert_with_timestamps \
+       --voice-id "<voice_id>" \
+       --model-id "eleven_multilingual_v2" \
+       --text "<scene.text>" \
+       --previous-text "<prev_scene.text>" \
+       --next-text "<next_scene.text>" \
+       --voice-settings.stability 0.55 \
+       --voice-settings.similarity-boost 0.8 \
+       --voice-settings.style 0.25 \
+       --voice-settings.use-speaker-boost true \
+       --voice-settings.speed 1.0 \
+       --output-format mp3_44100_128 \
        --format json
      ```
    - Decode `audio_base64` dari output JSON ke `public/audio/<scene-id>.mp3`, lalu konversi `alignment` (character-level timestamps) menjadi word-level timestamps di `src/generated-manifest.json` (untuk `@remotion/captions`).
@@ -199,8 +202,8 @@ Verifikasi seluruh poin berikut sebelum render final:
 
 ## FASE 7: EXPORT FINAL, QA REPORT & CLEANUP
 
-1. Pastikan folder `C:\Users\Hida\Documents\Remotion` ada, lalu render video final langsung ke:
-   `C:\Users\Hida\Documents\Remotion\<nama-video>.mp4`
+1. Pastikan folder output (`$REMOTION_OUT`, default `<Documents user>/Remotion`) ada, lalu render video final langsung ke:
+   `<REMOTION_OUT>/<nama-video>.mp4`
    *(Opsional jika diminta: render juga clean master tanpa caption & tanpa BGM/SFX untuk kebutuhan editing lanjutan.)*
 2. Verifikasi file `.mp4` hasil export:
    - File ada dan ukuran > 0 bytes.
@@ -208,5 +211,5 @@ Verifikasi seluruh poin berikut sebelum render final:
 3. **Laporan QA ke User:**
    - Laporkan file output, durasi aktual, voice yang dipakai, dan item yang sudah dicek otomatis (`tsc`, `eslint`, `ffprobe`, safe-zone).
    - Nyatakan keterbatasan pengecekan (audio & motion tetap perlu didengar/ditonton manusia) serta daftar kata/detik yang rawan salah ucap atau pergeseran sync agar user tahu titik mana yang perlu disimak.
-4. Setelah hasil `.mp4` terverifikasi dan tidak ada revisi lagi dari user, hapus workspace sementara (`C:\Users\Hida\AppData\Local\Temp\antigravity\remotion-<slug>`) agar tidak menyisakan file sampah.
-5. Cek isi `C:\Users\Hida\Documents\Remotion\` untuk memastikan hanya file `.mp4` hasil akhir yang tersisa.
+4. Setelah hasil `.mp4` terverifikasi dan tidak ada revisi lagi dari user, hapus workspace sementara (`$REMOTION_WORKSPACE`, default `<temp sistem>/remotion-<slug>`) agar tidak menyisakan file sampah.
+5. Cek isi `$REMOTION_OUT` untuk memastikan hanya file `.mp4` hasil akhir yang tersisa.
