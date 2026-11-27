@@ -29,3 +29,20 @@ Workflow ini memanggil skill & resource eksternal berikut (harus terpasang terpi
 - **Riset & Naskah:** `research`, `antislop-copywriting`, `writing-beats`, `writing-shape`
 - **Desain & UI:** `lemo-opuscar` (style library), `design-taste-frontend`, `antislop-ui`, `antislop-human`, `antislop-layoutmobile`
 - **TTS, Kode & QA:** `elevenlabs` CLI atau `voicestudio`, `typescript-write`, `typescript-review`, `antislop`, `antislop-code`, `agent-browser`
+
+## Lisensi & Copyright
+
+- **Repository ini (`commands/remotion.md` & `skills/remotion-video-director/SKILL.md`):**
+  Copyright (c) 2026 **dayrqctt** — dirilis di bawah lisensi [MIT](LICENSE).
+
+### Atribusi & Copyright Pihak Ketiga yang Digunakan
+
+- **Lemo-Opuscar** — Copyright (c) 2026 SecondFirst Pty Ltd, trading as LemoLab ([github.com/lemomo-ai/lemo-opuscar](https://github.com/lemomo-ai/lemo-opuscar))
+  - Docs/Prompts: `CC BY-NC 4.0`
+  - Demo Films & Stills: `CC BY 4.0`
+  - Code (`core/`, `tools/`, `plugin/`): `MIT License`
+- **Remotion** (`remotion`, `@remotion/captions`, `@remotion/cli`) — Copyright (c) Remotion AG (Remotion License).
+- **ElevenLabs** (`elevenlabs` CLI / `@elevenlabs/elevenlabs-js`) — Copyright (c) ElevenLabs Inc.
+- **VoiceStudio** — Local TTS & transcription service (model default OmniVoice berlisensi `CC-BY-NC`).
+- **Skill Pendukung Lainnya** (`research`, `antislop*`, `writing-beats`, `writing-shape`, `design-taste-frontend`, `typescript-write`, `typescript-review`, `agent-browser`) — hak cipta dan lisensi mengikuti masing-masing penulis/repositori aslinya.
+
